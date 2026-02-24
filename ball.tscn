@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://lkuk3pp3rqp5"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_cbx31"]
+radius = 0.22
+
+[node name="Ball" type="Node3D"]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mass = 0.2
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="RigidBody3D"]
+radius = 0.22
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+shape = SubResource("SphereShape3D_cbx31")

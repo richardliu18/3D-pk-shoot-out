@@ -1,0 +1,57 @@
+[gd_scene load_steps=6 format=3 uid="uid://lvciwcwksiw"]
+
+[ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://addons/proto_controller/proto_controller.tscn" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://lkuk3pp3rqp5" path="res://ball.tscn" id="2_0xm2m"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1bvp3"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_lquwl"]
+sky_material = SubResource("ProceduralSkyMaterial_1bvp3")
+
+[sub_resource type="Environment" id="Environment_7mycd"]
+background_mode = 2
+sky = SubResource("Sky_lquwl")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_7mycd")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.89802754, -0.30560753, 0.31646582, -0.076394655, 0.81673706, 0.5719305, -0.43325558, 0.48943308, -0.75679916, 0, 12, -0.2)
+shadow_enabled = true
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08863115, -0.4512059, -0.08617973)
+use_collision = true
+size = Vector3(23.92189, 1, 26.993591)
+
+[node name="Net" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -11.1)
+use_collision = true
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="Net"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5774723, 2.2271924, 1.709652)
+use_collision = true
+size = Vector3(7.32, 2.44, 3)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Net"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.577472, 2.1771924, 2.0096526)
+operation = 2
+size = Vector3(7, 2.3, 2.6000001)
+
+[node name="ProtoController" parent="." instance=ExtResource("1_0xm2m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 1.9, -4)
+can_freefly = true
+input_left = "move_left"
+input_right = "move_right"
+input_forward = "move_up"
+input_back = "move_down"
+input_jump = "jump"
+
+[node name="Ball" parent="." instance=ExtResource("2_0xm2m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8637589, 1.0274057, -3.7156754)
