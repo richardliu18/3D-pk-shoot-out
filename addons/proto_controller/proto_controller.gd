@@ -49,9 +49,14 @@ var look_rotation : Vector2
 var move_speed : float = 0.0
 var freeflying : bool = false
 
+
+@onready var SeeCast: RayCast3D = $Head/Camera3D/SeeCast
+
 ## IMPORTANT REFERENCES
 @onready var head: Node3D = $Head
 @onready var collider: CollisionShape3D = $Collider
+@onready var label: Label = $CanvasLayer/BoxContainer/Label
+
 
 func _ready() -> void:
 	check_input_mappings()
@@ -77,6 +82,23 @@ func _unhandled_input(event: InputEvent) -> void:
 			disable_freefly()
 
 func _physics_process(delta: float) -> void:
+	
+
+	if SeeCast.is_colliding():
+		var target = SeeCast.get_collider()
+		if target.has_method("interact"):
+			label.show()
+			if Input.is_action_just_pressed('interact'):
+				target.interact(-head.global_transform.basis.z)
+		else:
+			label.hide()
+	else:
+		label.hide()
+	
+			
+
+	
+
 	# If freeflying, handle freefly and nothing else
 	if can_freefly and freeflying:
 		var input_dir := Input.get_vector(input_left, input_right, input_forward, input_back)
