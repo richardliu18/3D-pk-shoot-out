@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://bs72ogkvdd7d6"]
+[gd_scene load_steps=6 format=3 uid="uid://bs72ogkvdd7d6"]
 
 [ext_resource type="Script" uid="uid://bcoooihbpj635" path="res://addons/proto_controller/proto_controller.gd" id="1_ucva2"]
+[ext_resource type="PackedScene" uid="uid://lkuk3pp3rqp5" path="res://ball.tscn" id="2_wr06p"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iof21"]
 albedo_color = Color(0.91806, 0.575202, 0.222449, 1)
@@ -15,6 +16,7 @@ height = 1.8
 
 [node name="ProtoController" type="CharacterBody3D"]
 script = ExtResource("1_ucva2")
+ball_scene = ExtResource("2_wr06p")
 
 [node name="Mesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -34,6 +36,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 
 [node name="SeeCast" type="RayCast3D" parent="Head/Camera3D"]
 transform = Transform3D(1, 0, 0, 0, -0.03275397, -0.99946344, 0, 0.99946344, -0.03275397, 0, -0.15634513, -0.3054905)
+exclude_parent = false
 target_position = Vector3(0, -3, 0)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]

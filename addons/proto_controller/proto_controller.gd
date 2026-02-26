@@ -50,12 +50,21 @@ var move_speed : float = 0.0
 var freeflying : bool = false
 
 
-@onready var SeeCast: RayCast3D = $Head/Camera3D/SeeCast
 
 ## IMPORTANT REFERENCES
 @onready var head: Node3D = $Head
 @onready var collider: CollisionShape3D = $Collider
+
+## Label ball instrucrtions
 @onready var label: Label = $CanvasLayer/BoxContainer/Label
+
+## line of sight
+@onready var camera: Camera3D = $Head/Camera3D
+@onready var SeeCast: RayCast3D = $Head/Camera3D/SeeCast
+
+var current_ball: Node3D = null
+@export var ball_scene : PackedScene
+
 
 
 func _ready() -> void:
@@ -72,6 +81,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	
 	# Look around
 	if mouse_captured and event is InputEventMouseMotion:
+		#rotation mode
 		rotate_look(event.relative)
 	
 	# Toggle freefly mode
@@ -80,13 +90,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			enable_freefly()
 		else:
 			disable_freefly()
+	
+	#ball spawning
+	if event is InputEventMouseButton \
+	and event.pressed \
+	and event.button_index == MOUSE_BUTTON_LEFT:
+			spawn_ball()
+	
+		
 
 func _physics_process(delta: float) -> void:
 	
 
 	if SeeCast.is_colliding():
 		var target = SeeCast.get_collider()
-		if target.has_method("interact"):
+		if target and target.has_method("interact"):
 			label.show()
 			if Input.is_action_just_pressed('interact'):
 				target.interact(-head.global_transform.basis.z)
@@ -96,8 +114,6 @@ func _physics_process(delta: float) -> void:
 		label.hide()
 	
 			
-
-	
 
 	# If freeflying, handle freefly and nothing else
 	if can_freefly and freeflying:
@@ -198,3 +214,13 @@ func check_input_mappings():
 	if can_freefly and not InputMap.has_action(input_freefly):
 		push_error("Freefly disabled. No InputAction found for input_freefly: " + input_freefly)
 		can_freefly = false
+		
+func spawn_ball():
+	if SeeCast.is_colliding():
+		var hit_position = SeeCast.get_collision_point()
+		if current_ball:
+			current_ball.queue_free()
+		current_ball = ball_scene.instantiate()
+		get_tree().current_scene.add_child(current_ball)
+		current_ball.global_position = hit_position + Vector3.UP * 0.5
+	

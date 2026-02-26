@@ -11,5 +11,4 @@ func _process(delta: float) -> void:
 	pass
 func interact(direction):
 	direction = direction.normalized()
-	var kick_strength = 5
-	apply_impulse(direction*15+Vector3.UP*3)
+	apply_central_impulse(direction *15 + Vector3.UP * 8)
