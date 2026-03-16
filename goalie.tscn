@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://furfr6oyysr1"]
+
+[ext_resource type="Script" uid="uid://cmsyl4oqqyefs" path="res://goalie.gd" id="1_awu4s"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yv1xi"]
+size = Vector3(1, 2.2, 1)
+
+[node name="Goalie" type="Node3D"]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="."]
+custom_integrator = true
+script = ExtResource("1_awu4s")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.64999974, 0)
+shape = SubResource("BoxShape3D_yv1xi")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+use_collision = true
+size = Vector3(1, 2.3, 1)

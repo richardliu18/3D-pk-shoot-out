@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://lvciwcwksiw"]
+[gd_scene load_steps=6 format=3 uid="uid://lvciwcwksiw"]
 
 [ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://addons/proto_controller/proto_controller.tscn" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://furfr6oyysr1" path="res://goalie.tscn" id="2_0xm2m"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1bvp3"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -54,3 +55,6 @@ input_right = "move_right"
 input_forward = "move_up"
 input_back = "move_down"
 input_jump = "jump"
+
+[node name="Goalie" parent="." instance=ExtResource("2_0xm2m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.17747545, 0.5487938, -7.6656213)

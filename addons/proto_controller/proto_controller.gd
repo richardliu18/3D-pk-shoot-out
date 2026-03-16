@@ -51,6 +51,7 @@ var freeflying : bool = false
 
 
 
+
 ## IMPORTANT REFERENCES
 @onready var head: Node3D = $Head
 @onready var collider: CollisionShape3D = $Collider
@@ -66,6 +67,17 @@ var current_ball: Node3D = null
 @export var ball_scene : PackedScene
 
 
+var target_ball : RigidBody3D = null
+var spin_input = 0.0
+var speed_input = 20
+
+
+enum PlayerState {
+	NORMAL,
+	AIMING
+}
+
+var state = PlayerState.NORMAL
 
 func _ready() -> void:
 	check_input_mappings()
@@ -74,13 +86,13 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Mouse capturing
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and state == PlayerState.NORMAL:
 		capture_mouse()
 	if Input.is_key_pressed(KEY_ESCAPE):
 		release_mouse()
 	
 	# Look around
-	if mouse_captured and event is InputEventMouseMotion:
+	if mouse_captured and state == PlayerState.NORMAL and event is InputEventMouseMotion:
 		#rotation mode
 		rotate_look(event.relative)
 	
@@ -92,22 +104,30 @@ func _unhandled_input(event: InputEvent) -> void:
 			disable_freefly()
 	
 	#ball spawning
-	if event is InputEventMouseButton \
+	if state == PlayerState.NORMAL \
+	and event is InputEventMouseButton \
 	and event.pressed \
 	and event.button_index == MOUSE_BUTTON_LEFT:
-			spawn_ball()
-	
-		
+		spawn_ball()
 
+	
+
+	
 func _physics_process(delta: float) -> void:
 	
 
 	if SeeCast.is_colliding():
 		var target = SeeCast.get_collider()
-		if target and target.has_method("interact"):
+
+		if target and target.has_method("kick"):
 			label.show()
-			if Input.is_action_just_pressed('interact'):
-				target.interact(-head.global_transform.basis.z)
+
+			if Input.is_action_just_pressed("interact"):
+				print("interacted")
+				state = PlayerState.AIMING
+				target_ball = target
+				spin_input = 0
+				speed_input = 20
 		else:
 			label.hide()
 	else:
@@ -140,7 +160,7 @@ func _physics_process(delta: float) -> void:
 		move_speed = base_speed
 
 	# Apply desired movement to velocity
-	if can_move:
+	if can_move and state == PlayerState.NORMAL:
 		var input_dir := Input.get_vector(input_left, input_right, input_forward, input_back)
 		var move_dir := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 		if move_dir:
@@ -219,8 +239,28 @@ func spawn_ball():
 	if SeeCast.is_colliding():
 		var hit_position = SeeCast.get_collision_point()
 		if current_ball:
-			current_ball.queue_free()
+			return
 		current_ball = ball_scene.instantiate()
 		get_tree().current_scene.add_child(current_ball)
 		current_ball.global_position = hit_position + Vector3.UP * 0.5
 	
+
+func _input(event):
+
+	if state == PlayerState.AIMING and target_ball:
+
+		if event is InputEventMouseMotion:
+			spin_input += event.relative.x * 0.01
+			speed_input += -event.relative.y * 0.02
+			speed_input = clamp(speed_input, 5, 60)
+
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+
+			var direction = -camera.global_transform.basis.z
+			target_ball.kick(direction, speed_input, spin_input)
+
+			state = PlayerState.NORMAL
+			target_ball = null
+			current_ball = null
+			spin_input = 0
+			speed_input = 20
