@@ -70,6 +70,7 @@ var current_ball: Node3D = null
 var target_ball : RigidBody3D = null
 var spin_input = 0.0
 var speed_input = 20
+var swipe_strength = 0.0
 
 
 enum PlayerState {
@@ -251,12 +252,21 @@ func _input(event):
 
 		if event is InputEventMouseMotion:
 			spin_input += event.relative.x * 0.01
+			
+			var swipe = -event.relative.y
+			
 			speed_input += -event.relative.y * 0.02
 			speed_input = clamp(speed_input, 5, 60)
+			
+			swipe_strength = clamp(abs(swipe), 0, 50)
 
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 
 			var direction = -camera.global_transform.basis.z
+			var lift = clamp(swipe_strength / 50.0, 0.1, 0.7)
+
+			direction.y += lift
+
 			target_ball.kick(direction, speed_input, spin_input)
 
 			state = PlayerState.NORMAL

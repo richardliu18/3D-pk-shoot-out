@@ -1,30 +1,34 @@
 extends RigidBody3D
 
+@export var magnus_strength := 0.15
+@export var air_drag := 0.02
 
-	
-var spin_force = 0.0
+func _physics_process(delta):
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	var magnus_force = angular_velocity.cross(linear_velocity) * 0.05
+	# --- Magnus Effect (curve) ---
+	var magnus_force = angular_velocity.cross(linear_velocity) * magnus_strength
 	apply_central_force(magnus_force)
-	
-func interact(direction) -> void:
-	pass
-	#direction = direction.normalized()
-	#apply_central_impulse(direction *15 + Vector3.UP * 8)
+
+	# --- Air resistance (prevents infinite speed) ---
+	apply_central_force(-linear_velocity * air_drag)
+
 
 func kick(direction: Vector3, power: float, spin: float):
 
 	direction = direction.normalized()
 
-	# launch the ball
+	# reset motion (important if reusing ball)
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+
+	# --- Launch ---
 	apply_central_impulse(direction * power)
 
-	# apply spin
-	angular_velocity = Vector3.UP * spin
+	# --- Add spin ---
+	# sidespin (curve left/right)
+	var side_spin = Vector3.UP * spin
+	
+	# slight topspin (dip)
+	var top_spin = direction.cross(Vector3.UP) * (spin * 0.2)
+
+	angular_velocity = side_spin + top_spin
