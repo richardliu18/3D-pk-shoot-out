@@ -68,9 +68,15 @@ var current_ball: Node3D = null
 
 
 var target_ball : RigidBody3D = null
-var spin_input = 0.0
-var speed_input = 20
-var swipe_strength = 0.0
+#var spin_input = 0.0
+#var speed_input = 20
+#var swipe_strength = 0.0
+
+var swipe_start := Vector2.ZERO
+var swipe_end := Vector2.ZERO
+var is_swiping := false
+
+var swipe_vector := Vector2.ZERO
 
 
 enum PlayerState {
@@ -127,8 +133,6 @@ func _physics_process(delta: float) -> void:
 				print("interacted")
 				state = PlayerState.AIMING
 				target_ball = target
-				spin_input = 0
-				speed_input = 20
 		else:
 			label.hide()
 	else:
@@ -239,8 +243,12 @@ func check_input_mappings():
 func spawn_ball():
 	if SeeCast.is_colliding():
 		var hit_position = SeeCast.get_collision_point()
+		
 		if current_ball:
-			return
+			current_ball.queue_free()
+			current_ball = null
+			
+	
 		current_ball = ball_scene.instantiate()
 		get_tree().current_scene.add_child(current_ball)
 		current_ball.global_position = hit_position + Vector3.UP * 0.5
@@ -250,27 +258,41 @@ func _input(event):
 
 	if state == PlayerState.AIMING and target_ball:
 
-		if event is InputEventMouseMotion:
-			spin_input += event.relative.x * 0.01
+		# Start swipe
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				is_swiping = true
+				swipe_vector = Vector2.ZERO
+			else:
+				# End swipe
+				is_swiping = false
+				process_swipe()
+
+		# Track movement while swiping
+		if is_swiping and event is InputEventMouseMotion:
+			swipe_vector += event.relative
 			
-			var swipe = -event.relative.y
 			
-			speed_input += -event.relative.y * 0.02
-			speed_input = clamp(speed_input, 5, 60)
-			
-			swipe_strength = clamp(abs(swipe), 0, 50)
+func process_swipe():
 
-		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	print("swipe_vector:", swipe_vector)
 
-			var direction = -camera.global_transform.basis.z
-			var lift = clamp(swipe_strength / 50.0, 0.1, 0.7)
+	# --- Power ---
+	var power = clamp(swipe_vector.length() * .005, 0.05, 10)
 
-			direction.y += lift
+	# --- Spin ---
+	var spin = swipe_vector.x * -0.004
 
-			target_ball.kick(direction, speed_input, spin_input)
+	# --- Lift ---
+	var lift = clamp(-swipe_vector.y * 0.01, 0.03, 0.8)
 
-			state = PlayerState.NORMAL
-			target_ball = null
-			current_ball = null
-			spin_input = 0
-			speed_input = 20
+	var direction = -camera.global_transform.basis.z
+	direction.y += lift
+
+	print("Power: ", power, " Lift: ", lift, " Spin: ", spin)
+	
+	target_ball.kick(direction, power, spin)
+
+	# Reset
+	state = PlayerState.NORMAL
+	target_ball = null
